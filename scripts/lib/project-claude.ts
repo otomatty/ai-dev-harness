@@ -10,29 +10,34 @@ const SUBDIR: Record<Capability["type"], string> = {
   tool: "tools", sensor: "sensors", "aidlc-rule": "aidlc-rules",
 };
 
-export function projectClaude(
-  caps: Capability[], coreDir: string, outDir: string, harnessDir: string,
+export function projectClaudeComponents(
+  caps: Capability[], coreDir: string, baseDir: string, harnessDir: string,
 ): ProjectResult {
-  const base = join(outDir, ".claude");
   const vars = { HARNESS_DIR: harnessDir };
 
   for (const cap of caps) {
     if (cap.type === "skill") {
-      const dest = join(base, "skills", cap.name, "SKILL.md");
+      const dest = join(baseDir, "skills", cap.name, "SKILL.md");
       writeFileEnsured(dest, applyTemplate(cap.rawText, vars));
       const srcDir = dirname(cap.sourcePath);
       for (const asset of cap.assets) {
-        copyFileEnsured(join(srcDir, asset), join(base, "skills", cap.name, asset));
+        copyFileEnsured(join(srcDir, asset), join(baseDir, "skills", cap.name, asset));
       }
     } else if (cap.type === "aidlc-rule") {
-      // preserve path under ai-dlc/: name already holds "<sub>/<file>"
-      const dest = join(base, "aidlc-rules", `${cap.name}.md`);
+      const dest = join(baseDir, "aidlc-rules", `${cap.name}.md`);
       writeFileEnsured(dest, applyTemplate(cap.rawText, vars));
     } else {
       const ext = cap.type === "hook" || cap.type === "tool" ? "ts" : "md";
-      const dest = join(base, SUBDIR[cap.type], `${cap.name}.${ext}`);
+      const dest = join(baseDir, SUBDIR[cap.type], `${cap.name}.${ext}`);
       writeFileEnsured(dest, applyTemplate(cap.rawText, vars));
     }
   }
   return { warnings: [] };
+}
+
+export function projectClaude(
+  caps: Capability[], coreDir: string, outDir: string, harnessDir: string,
+): ProjectResult {
+  const base = harnessDir === "." ? outDir : join(outDir, harnessDir);
+  return projectClaudeComponents(caps, coreDir, base, harnessDir);
 }

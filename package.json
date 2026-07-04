@@ -2,9 +2,13 @@
   "name": "ai-dev-harness",
   "private": true,
   "type": "module",
+  "bin": {
+    "ai-dev-harness": "./scripts/install.ts"
+  },
   "scripts": {
     "build": "bun run scripts/build.ts",
     "check": "bun run scripts/check.ts",
+    "install:harness": "bun run scripts/install.ts",
     "test": "bun test"
   },
   "dependencies": {

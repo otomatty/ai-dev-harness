@@ -1,16 +1,15 @@
-// scripts/check.test.ts
 import { test, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, mkdirSync, writeFileSync, appendFileSync, rmSync } from "node:fs";
+import { mkdtempSync, appendFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { build } from "./build";
 import { check } from "./check";
+import { seedMinimalHarnessRoot } from "./lib/test-fixture";
 
 let root: string;
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), "checkroot-"));
-  mkdirSync(join(root, "core/skills/foo"), { recursive: true });
-  writeFileSync(join(root, "core/skills/foo/SKILL.md"), "---\nname: foo\ndescription: d\n---\nbody");
+  seedMinimalHarnessRoot(root);
 });
 afterEach(() => rmSync(root, { recursive: true, force: true }));
 

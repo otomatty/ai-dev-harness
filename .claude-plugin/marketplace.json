@@ -1,0 +1,16 @@
+{
+  "name": "ai-dev-harness",
+  "owner": {
+    "name": "otomatty"
+  },
+  "metadata": {
+    "description": "個人最適化スキル・ハーネス・AI-DLC 拡張"
+  },
+  "plugins": [
+    {
+      "name": "ai-dev-harness",
+      "source": "./dist/claude-plugin",
+      "description": "個人最適化スキル・ハーネス・AI-DLC 拡張（Claude Code）"
+    }
+  ]
+}

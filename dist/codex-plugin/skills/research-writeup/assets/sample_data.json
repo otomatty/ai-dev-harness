@@ -1,0 +1,73 @@
+{
+  "title": "Node.js バックエンドフレームワーク選定",
+  "date": "2026-07-04",
+  "candidates_label": "Express / Fastify / Hono",
+  "verification_note": "要一次情報確認",
+  "sample": true,
+  "requirements": {
+    "purpose": "新規APIサーバーのフレームワーク選定",
+    "must": ["TypeScript前提", "中規模の同時接続に耐える性能", "長期運用の保守性"],
+    "want": ["学習コストの低さ", "周辺ライブラリの豊富さ"]
+  },
+  "candidates": [
+    {"name": "Express", "color": "#0e7c86", "scores": {"性能": 3, "エコシステム": 5}},
+    {"name": "Fastify", "color": "#3b4d9e", "scores": {"性能": 5, "エコシステム": 4}},
+    {"name": "Hono",    "color": "#a45b3a", "scores": {"性能": 5, "エコシステム": 3}}
+  ],
+  "positioning": {"x": "性能", "y": "エコシステム"},
+  "comparison": {
+    "rows": [
+      {"axis": "性能(◎)", "cells": [
+        {"text": "最速帯ではない", "badge": "warn", "url": "#express-perf"},
+        {"text": "スキーマベースで高速", "badge": "ok", "url": "#fastify-perf"},
+        {"text": "軽量ランタイム志向", "badge": "warn", "url": "#hono-perf"}]},
+      {"axis": "型対応(◎)", "cells": [
+        {"text": "別途型定義に依存", "badge": "warn", "url": "#express-ts"},
+        {"text": "公式に型サポート", "badge": "ok", "url": "#fastify-ts"},
+        {"text": "TSファースト設計", "badge": "ok", "url": "#hono-ts"}]}
+    ]
+  },
+  "findings": [
+    {"candidate": "Fastify", "items": [
+      {"claim": "公式ドキュメントは、低オーバーヘッドと高いスループットを設計目標として掲げている。",
+       "badge": "ok",
+       "citation": {
+         "quote": "(SAMPLE) low overhead and high throughput.",
+         "lang": "en",
+         "translation": "(サンプル)低オーバーヘッドかつ高スループット。",
+         "source": "Fastify 公式ドキュメント",
+         "url": "https://fastify.dev/",
+         "accessed": "2026-07-04",
+         "version": "v5"
+       }},
+      {"claim": "TypeScript の型は公式にサポートされていると明記されている。",
+       "badge": "ok",
+       "citation": {
+         "quote": "(SAMPLE) TypeScript type definitions are maintained.",
+         "lang": "en",
+         "translation": "(サンプル)TypeScript の型定義はメンテナンスされている。",
+         "source": "Fastify TypeScript ガイド",
+         "url": "https://fastify.dev/docs/latest/Reference/TypeScript/",
+         "accessed": "2026-07-04",
+         "version": "v5"
+       }}
+    ]},
+    {"candidate": "Express", "items": [
+      {"claim": "型定義は本体同梱ではなく別パッケージに依存する構成である。",
+       "badge": "warn",
+       "citation": {
+         "quote": "(SAMPLE)@types/express を別途インストールする。",
+         "lang": "ja",
+         "source": "Express 公式ドキュメント",
+         "url": "https://expressjs.com/",
+         "accessed": "2026-07-04",
+         "version": "v4"
+       }}
+    ]}
+  ],
+  "recommendation": {
+    "options_note": "検討した選択肢:Express / Fastify / Hono。要点は比較表、根拠は上記を参照。",
+    "flow": {"question": "高負荷 / 型厳格?", "yes": "Fastify / Hono", "no": "Express(実績重視)"},
+    "interpretation": "must の「性能・型対応・保守性」を重視するなら Fastify を推奨。Expressのエコシステムの厚さは魅力だが、型対応と性能で must を満たしきれない。エッジ/軽量ランタイム前提が強まる場合は Hono を再検討(エコシステムの薄さが分岐点)。"
+  }
+}

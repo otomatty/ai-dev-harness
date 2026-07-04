@@ -1,0 +1,14 @@
+{
+  "name": "ai-dev-harness",
+  "version": "0.1.0",
+  "description": "個人最適化スキル・ハーネス・AI-DLC 拡張",
+  "author": {
+    "name": "otomatty"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ai-dev-harness",
+    "shortDescription": "個人最適化スキル・ハーネス・AI-DLC 拡張",
+    "category": "Productivity"
+  }
+}

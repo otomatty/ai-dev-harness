@@ -29,3 +29,12 @@ test("hook degrades with a warning and an _unsupported note", () => {
   expect(res.warnings.some((w) => w.includes("guard"))).toBe(true);
   expect(existsSync(join(out, ".cursor/rules/_unsupported/hook-guard.md"))).toBe(true);
 });
+
+test("substitutes {{HARNESS_DIR}} in skill body (no raw token leaks into .mdc)", () => {
+  mkdirSync(join(core, "skills/tmpl"), { recursive: true });
+  writeFileSync(join(core, "skills/tmpl/SKILL.md"), "---\nname: tmpl\ndescription: d\n---\nsee {{HARNESS_DIR}}/agents/x.md");
+  projectCursor(scanCore(core), core, out);
+  const mdc = readFileSync(join(out, ".cursor/rules/tmpl.mdc"), "utf8");
+  expect(mdc).toContain(".cursor/agents/x.md");
+  expect(mdc).not.toContain("{{HARNESS_DIR}}");
+});

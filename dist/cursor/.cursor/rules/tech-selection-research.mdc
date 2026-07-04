@@ -11,7 +11,7 @@ alwaysApply: false
 技術選定は「情報を集める」作業ではなく「判断可能な形に情報を整理する」作業である。**Claude Code での実行を前提**とし、本線(オーケストレーター)は段取りと統合に徹し、重い調査はサブエージェントへ委譲して本線コンテキストを汚さない。
 
 関連スキル/エージェント:
-- 各候補の調査 → **candidate-researcher** サブエージェント(`{{HARNESS_DIR}}/agents/candidate-researcher.md`)
+- 各候補の調査 → **candidate-researcher** サブエージェント(`.cursor/agents/candidate-researcher.md`)
 - 裏取り → **source-verification** スキル(サブエージェント側で適用)
 - 成果物のHTML化 → **research-writeup** の生成器(`assets/render.py`)
 - 生成後の修正 → **report-revision** スキル

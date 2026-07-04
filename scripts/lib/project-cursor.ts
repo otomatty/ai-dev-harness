@@ -2,7 +2,7 @@ import { join } from "node:path";
 import type { Capability } from "./scan";
 import type { ProjectResult } from "./project-claude";
 import { serializeFrontmatter } from "./frontmatter";
-import { writeFileEnsured } from "./io";
+import { applyTemplate, writeFileEnsured } from "./io";
 
 export function projectCursor(
   caps: Capability[], _coreDir: string, outDir: string,
@@ -13,7 +13,8 @@ export function projectCursor(
   for (const cap of caps) {
     if (cap.type === "skill" || cap.type === "aidlc-rule") {
       const desc = String(cap.frontmatter.description ?? cap.name);
-      const mdc = serializeFrontmatter({ description: desc, alwaysApply: false }, cap.body);
+      const body = applyTemplate(cap.body, { HARNESS_DIR: ".cursor" });
+      const mdc = serializeFrontmatter({ description: desc, alwaysApply: false }, body);
       const sub = cap.type === "aidlc-rule" ? join("aidlc", `${cap.name}.mdc`) : `${cap.name}.mdc`;
       writeFileEnsured(join(rules, sub), mdc);
     } else {

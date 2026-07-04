@@ -17,7 +17,7 @@ export function hashDir(dir: string): string {
   const h = createHash("sha256");
   const entries = files(dir)
     .map((f) => [relative(dir, f).split(sep).join("/"), readFileSync(f)] as const)
-    .sort((x, y) => x[0].localeCompare(y[0]));
+    .sort((x, y) => (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0));
   for (const [rel, buf] of entries) {
     h.update(rel);
     h.update("\0");

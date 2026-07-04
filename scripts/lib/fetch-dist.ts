@@ -57,13 +57,14 @@ function tarballUrlFor(repo: string, ref: string): string {
   return `https://codeload.github.com/${repo}/tar.gz/${encodeURIComponent(ref)}`;
 }
 
-function findRepoDir(extractDir: string): string {
-  const entries = readdirSync(extractDir);
-  const repoDir = entries.find((name) => name.startsWith("ai-dev-harness"));
-  if (!repoDir) {
-    throw new Error(`Unexpected tarball layout under ${extractDir}`);
+export function findRepoDir(extractDir: string): string {
+  const entries = readdirSync(extractDir).filter((name) => name !== "." && name !== "..");
+  if (entries.length !== 1) {
+    throw new Error(
+      `Unexpected tarball layout under ${extractDir}: expected 1 root directory, got ${entries.length}`,
+    );
   }
-  return join(extractDir, repoDir);
+  return join(extractDir, entries[0]!);
 }
 
 async function extractTarGz(archivePath: string, destDir: string): Promise<void> {

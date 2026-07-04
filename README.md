@@ -30,8 +30,7 @@ bunx github:otomatty/ai-dev-harness cursor /path/to/project
 bunx github:otomatty/ai-dev-harness agents-md --force
 ```
 
-`bun` が無い環境では `npx --yes github:otomatty/ai-dev-harness claude` でも可。
-シェル一行版:
+`bun` が無い環境では `curl -fsSL .../install.sh | bash` が curl+tar で dist を取得します（Node.js / npx 不要）。
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/otomatty/ai-dev-harness/main/scripts/install.sh | bash -s -- claude

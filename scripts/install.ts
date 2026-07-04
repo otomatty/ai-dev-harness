@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { copyTree } from "./lib/copy-tree";
 import { fetchDistSource } from "./lib/fetch-dist";
@@ -32,12 +32,13 @@ export async function installHarness(options: InstallOptions): Promise<InstallRe
   const localSource = options.sourceRoot
     ? join(options.sourceRoot, DIST_SOURCE[agent])
     : undefined;
+  const useRemote = repo !== undefined || ref !== undefined;
 
   let sourcePath: string;
   let source: "local" | "remote";
   let cleanup: (() => void) | undefined;
 
-  if (localSource && existsSync(localSource)) {
+  if (!useRemote && localSource && existsSync(localSource)) {
     sourcePath = localSource;
     source = "local";
   } else {
@@ -48,12 +49,13 @@ export async function installHarness(options: InstallOptions): Promise<InstallRe
   }
 
   try {
-    if (agent === "agents-md" && existsSync(destPath) && !force) {
+    if (existsSync(destPath) && !force) {
       throw new Error(
         `${destPath} already exists. Re-run with --force to overwrite, or merge manually.`,
       );
     }
-    copyTree(sourcePath, destPath);
+    const replace = force && statSync(sourcePath).isDirectory();
+    copyTree(sourcePath, destPath, { replace });
     return { agent, targetDir: resolve(targetDir), destPath, source };
   } finally {
     cleanup?.();
@@ -71,7 +73,7 @@ Agents:
 Options:
   --ref <ref>     Git ref to fetch when dist is not local (default: main)
   --repo <repo>   GitHub repo slug (default: otomatty/ai-dev-harness)
-  --force         Overwrite existing AGENTS.md
+  --force         Overwrite existing destination (.claude, .cursor, AGENTS.md)
   -h, --help      Show this help
 
 Examples:

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test } from "bun:test";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { build } from "./build";
@@ -67,4 +67,36 @@ test("installHarness overwrites AGENTS.md with force", async () => {
   });
   const content = readFileSync(join(project, "AGENTS.md"), "utf8");
   expect(content).toContain("Generated from `core/`");
+});
+
+test("installHarness refuses to overwrite .claude without force", async () => {
+  mkdirSync(join(project, ".claude"), { recursive: true });
+  writeFileSync(join(project, ".claude/settings.json"), '{"custom":true}\n');
+  await expect(
+    installHarness({ agent: "claude", targetDir: project, sourceRoot: root }),
+  ).rejects.toThrow(/already exists/);
+  expect(readFileSync(join(project, ".claude/settings.json"), "utf8")).toContain("custom");
+});
+
+test("installHarness replaces .claude directory with force", async () => {
+  mkdirSync(join(project, ".claude/legacy"), { recursive: true });
+  writeFileSync(join(project, ".claude/legacy/old.txt"), "keep-me-not");
+  await installHarness({
+    agent: "claude",
+    targetDir: project,
+    sourceRoot: root,
+    force: true,
+  });
+  expect(existsSync(join(project, ".claude/skills/foo/SKILL.md"))).toBe(true);
+  expect(existsSync(join(project, ".claude/legacy/old.txt"))).toBe(false);
+});
+
+test("installHarness uses remote fetch when --ref is provided", async () => {
+  const result = await installHarness({
+    agent: "claude",
+    targetDir: project,
+    sourceRoot: root,
+    ref: "main",
+  });
+  expect(result.source).toBe("remote");
 });

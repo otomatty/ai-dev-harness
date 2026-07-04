@@ -17,8 +17,13 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { resolveProjectDirFromHook, toPosix } from "../tools/aidlc-lib.ts";
-import { loadConfig, loadLedger, activeCycle, ledgerRelPath } from "../tools/aidlc-tdd.ts";
+import { resolveProjectDirFromHook, toPosix } from "../tools/aidlc-lib";
+import {
+  loadConfig,
+  loadLedger,
+  activeCycle,
+  ledgerRelPath,
+} from "../tools/aidlc-tdd";
 
 const projectDir = resolveProjectDirFromHook(import.meta.url);
 
@@ -72,7 +77,8 @@ async function main(): Promise<void> {
   }
 
   const tool = event.tool_name ?? "";
-  if (tool !== "Write" && tool !== "Edit" && tool !== "MultiEdit") allowSilent();
+  if (tool !== "Write" && tool !== "Edit" && tool !== "MultiEdit")
+    allowSilent();
 
   const fp = event?.tool_input?.file_path ?? "";
   if (!fp) allowSilent();
@@ -84,7 +90,8 @@ async function main(): Promise<void> {
   const isPy = rel.endsWith(".py");
   const isTest = matchesAny(rel, cfg.test_globs);
   const isExempt = matchesAny(rel, cfg.exempt_globs);
-  const isProd = isPy && !isTest && !isExempt && matchesAny(rel, cfg.prod_globs);
+  const isProd =
+    isPy && !isTest && !isExempt && matchesAny(rel, cfg.prod_globs);
 
   if (!isProd) allowSilent(); // tests, configs, docs, exempt files -> always fine
 

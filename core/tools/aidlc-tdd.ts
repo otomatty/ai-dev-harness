@@ -16,7 +16,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { resolveProjectDir } from "./aidlc-lib.ts";
+import { resolveProjectDir } from "./aidlc-lib";
 
 // ── paths ────────────────────────────────────────────────────────────────
 // NOTE: kept as a flat aidlc-docs/.tdd for portability. If you want it scoped
@@ -47,8 +47,18 @@ export interface TddConfig {
 }
 const DEFAULT_CONFIG: TddConfig = {
   prod_globs: ["src/**/*.py", "app/**/*.py", "**/*.py"],
-  test_globs: ["tests/**/*.py", "**/test_*.py", "**/*_test.py", "**/conftest.py"],
-  exempt_globs: ["**/migrations/**", "**/__init__.py", "setup.py", "**/_generated/**"],
+  test_globs: [
+    "tests/**/*.py",
+    "**/test_*.py",
+    "**/*_test.py",
+    "**/conftest.py",
+  ],
+  exempt_globs: [
+    "**/migrations/**",
+    "**/__init__.py",
+    "setup.py",
+    "**/_generated/**",
+  ],
   coverage_floor: 80,
   cov_package: "",
   pytest_cmd: ["python", "-m", "pytest"],
@@ -85,7 +95,10 @@ export function loadConfig(projectDir: string): TddConfig {
   return { ...DEFAULT_CONFIG, ...readJson(configPath(projectDir), {}) };
 }
 export function loadLedger(projectDir: string): Ledger {
-  return readJson<Ledger>(ledgerPath(projectDir), { active_cycle: null, cycles: [] });
+  return readJson<Ledger>(ledgerPath(projectDir), {
+    active_cycle: null,
+    cycles: [],
+  });
 }
 export function activeCycle(led: Ledger): Cycle | null {
   if (!led.active_cycle) return null;
@@ -106,12 +119,16 @@ function runPytest(projectDir: string, cfg: TddConfig, extra: string[]) {
     encoding: "utf8",
     maxBuffer: 1 << 24,
   });
-  return { rc: r.status ?? -1, out: (r.stdout ?? "") + "\n" + (r.stderr ?? "") };
+  return {
+    rc: r.status ?? -1,
+    out: (r.stdout ?? "") + "\n" + (r.stderr ?? ""),
+  };
 }
 
 // ── commands ─────────────────────────────────────────────────────────────
 function cmdInit(projectDir: string): void {
-  if (!existsSync(configPath(projectDir))) writeJson(configPath(projectDir), DEFAULT_CONFIG);
+  if (!existsSync(configPath(projectDir)))
+    writeJson(configPath(projectDir), DEFAULT_CONFIG);
   if (!existsSync(ledgerPath(projectDir)))
     writeJson(ledgerPath(projectDir), { active_cycle: null, cycles: [] });
   console.log(
@@ -121,7 +138,9 @@ function cmdInit(projectDir: string): void {
 
 function cmdRed(projectDir: string, argv: string[]): void {
   if (!argv[0]) {
-    console.error("usage: aidlc-tdd.ts red <test_path_or_nodeid> [--unit NAME]");
+    console.error(
+      "usage: aidlc-tdd.ts red <test_path_or_nodeid> [--unit NAME]",
+    );
     process.exit(2);
   }
   const target = argv[0];
@@ -133,25 +152,40 @@ function cmdRed(projectDir: string, argv: string[]): void {
     console.error(
       "REFUSED: the test PASSED on first run. A test that passes immediately " +
         "proves nothing — it tests existing behaviour. Rewrite it to describe the " +
-        "NEW behaviour, then retry.\n\n" + tail(out),
+        "NEW behaviour, then retry.\n\n" +
+        tail(out),
     );
     process.exit(1);
   }
   if (rc === 5) {
-    console.error("REFUSED: no tests collected at that target. Check the path/nodeid.\n\n" + tail(out));
+    console.error(
+      "REFUSED: no tests collected at that target. Check the path/nodeid.\n\n" +
+        tail(out),
+    );
     process.exit(1);
   }
   // A brand-new module can only fail its first test via an import/attr error
   // (nothing to import yet) — pytest surfaces that as rc==2. Accept it as a
   // valid "feature missing" RED, but refuse test-side syntax errors.
-  const FEATURE_MISSING = ["ModuleNotFoundError", "ImportError", "cannot import name", "AttributeError", "NameError"];
+  const FEATURE_MISSING = [
+    "ModuleNotFoundError",
+    "ImportError",
+    "cannot import name",
+    "AttributeError",
+    "NameError",
+  ];
   const TEST_BROKEN = ["SyntaxError", "IndentationError"];
   const featureMissing = FEATURE_MISSING.some((s) => out.includes(s));
   const testBroken = TEST_BROKEN.some((s) => out.includes(s));
   const validRed = rc === 1 || (rc === 2 && featureMissing && !testBroken);
   if (!validRed) {
-    const why = testBroken ? "the test itself is broken" : "collection/config error, not a clean feature-missing failure";
-    console.error(`REFUSED: pytest exited ${rc} (${why}). The RED must fail because the code is missing or wrong — not because the test is malformed.\n\n` + tail(out));
+    const why = testBroken
+      ? "the test itself is broken"
+      : "collection/config error, not a clean feature-missing failure";
+    console.error(
+      `REFUSED: pytest exited ${rc} (${why}). The RED must fail because the code is missing or wrong — not because the test is malformed.\n\n` +
+        tail(out),
+    );
     process.exit(1);
   }
 
@@ -184,22 +218,32 @@ function cmdGreen(projectDir: string): void {
   }
   const floor = Number(cfg.coverage_floor) || 0;
   const extra = ["-q"];
-  if (floor > 0) extra.push(`--cov=${cfg.cov_package || "."}`, "--cov-report=term-missing");
+  if (floor > 0)
+    extra.push(`--cov=${cfg.cov_package || "."}`, "--cov-report=term-missing");
   const { rc, out } = runPytest(projectDir, cfg, extra);
 
   if (rc !== 0) {
-    console.error("NOT GREEN: the suite is not all-passing. Fix the CODE (never the test), then retry.\n\n" + tail(out, 30));
+    console.error(
+      "NOT GREEN: the suite is not all-passing. Fix the CODE (never the test), then retry.\n\n" +
+        tail(out, 30),
+    );
     process.exit(1);
   }
   if (floor > 0) {
     const m = out.match(/^TOTAL\s+.*?(\d+)%\s*$/m);
     if (!m) {
-      console.error("NOT GREEN: could not read coverage total. Is pytest-cov installed? Set coverage_floor=0 to disable.\n\n" + tail(out, 30));
+      console.error(
+        "NOT GREEN: could not read coverage total. Is pytest-cov installed? Set coverage_floor=0 to disable.\n\n" +
+          tail(out, 30),
+      );
       process.exit(1);
     }
     const pct = Number(m[1]);
     if (pct < floor) {
-      console.error(`NOT GREEN: coverage ${pct}% is below the ${floor}% floor. Add tests (RED first) before closing.\n\n` + tail(out, 30));
+      console.error(
+        `NOT GREEN: coverage ${pct}% is below the ${floor}% floor. Add tests (RED first) before closing.\n\n` +
+          tail(out, 30),
+      );
       process.exit(1);
     }
   }
@@ -207,7 +251,9 @@ function cmdGreen(projectDir: string): void {
   cyc.green_at = now();
   led.active_cycle = null;
   writeJson(ledgerPath(projectDir), led);
-  console.log(`GREEN confirmed (cycle ${cyc.id} closed). Refactor while staying green. Production edits are LOCKED again until the next \`red\`.`);
+  console.log(
+    `GREEN confirmed (cycle ${cyc.id} closed). Refactor while staying green. Production edits are LOCKED again until the next \`red\`.`,
+  );
 }
 
 function cmdStatus(projectDir: string): void {
@@ -215,7 +261,11 @@ function cmdStatus(projectDir: string): void {
   const cyc = activeCycle(led);
   console.log(`root: ${projectDir}`);
   console.log(`enforced: ${loadConfig(projectDir).enforced}`);
-  console.log(cyc ? `ACTIVE cycle ${cyc.id} [${cyc.state}] -> ${cyc.test_target}` : "no active cycle — production edits are LOCKED (write a failing test next).");
+  console.log(
+    cyc
+      ? `ACTIVE cycle ${cyc.id} [${cyc.state}] -> ${cyc.test_target}`
+      : "no active cycle — production edits are LOCKED (write a failing test next).",
+  );
   console.log(`total cycles recorded: ${led.cycles.length}`);
 }
 
@@ -223,10 +273,14 @@ function main(): void {
   const projectDir = resolveProjectDir();
   const [cmd, ...rest] = process.argv.slice(2);
   switch (cmd) {
-    case "init": return cmdInit(projectDir);
-    case "red": return cmdRed(projectDir, rest);
-    case "green": return cmdGreen(projectDir);
-    case "status": return cmdStatus(projectDir);
+    case "init":
+      return cmdInit(projectDir);
+    case "red":
+      return cmdRed(projectDir, rest);
+    case "green":
+      return cmdGreen(projectDir);
+    case "status":
+      return cmdStatus(projectDir);
     default:
       console.error("usage: aidlc-tdd.ts <init|red|green|status>");
       process.exit(2);

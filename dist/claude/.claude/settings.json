@@ -1,1 +1,15 @@
-{}
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun .claude/hooks/aidlc-tdd-guard.ts"
+          }
+        ]
+      }
+    ]
+  }
+}

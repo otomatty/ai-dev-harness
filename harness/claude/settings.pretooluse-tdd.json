@@ -1,0 +1,17 @@
+{
+  "// source": "Imported from python-tdd-ai-dlc/settings.PreToolUse.block.json",
+  "// why-first": "PreToolUse hooks evaluate in array order and stop at the first deny; keep the guard first.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun {{HARNESS_DIR}}/hooks/aidlc-tdd-guard.ts"
+          }
+        ]
+      }
+    ]
+  }
+}

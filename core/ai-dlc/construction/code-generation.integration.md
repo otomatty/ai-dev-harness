@@ -1,0 +1,77 @@
+# Wiring TDD into the Construction stage (code-generation.md)
+
+Two ways to do this. Pick one.
+
+## Option A — edit `code-generation.md` in place (least invasive)
+
+You keep the stage id `code-generation` / scope code `CG`, so no scope stage
+lists change. Make three edits to
+`core/aidlc-common/stages/construction/code-generation.md`:
+
+### 1. Frontmatter — attach the pytest sensor
+
+```diff
+ sensors:
+   - linter
+   - type-check
++  - pytest
+```
+
+The graph builder lifts this into the stage node's `sensors_applicable`, so
+`aidlc-sensor-fire.ts` starts firing the pytest sensor on Python writes for this
+stage. (Advisory — evidence at the gate. The hard gate is the PreToolUse hook.)
+
+### 2. Step 2 (Planning) — make the plan a RED backlog, tests BEFORE code
+
+Replace the "Recommended plan structure" block's ordering so every implementation
+step is preceded by its test step, and state the rule explicitly:
+
+```
+**TDD ordering is MANDATORY.** Each behaviour is planned as: (a) write the
+failing test, (b) prove RED, (c) minimal code, (d) prove GREEN. The plan is an
+ordered list of acceptance-criterion → test-target rows (a RED backlog), NOT a
+list of code steps. Derive one row per acceptance criterion (EARS WHEN/IF/WHILE…
+THEN… maps ~1:1 to a test case).
+
+Step 1: Project structure setup (dirs, config, pyproject.toml/pytest.ini)
+Step 2: For behaviour #1 — write failing test  → prove RED  → minimal code → prove GREEN
+Step 3: For behaviour #2 — write failing test  → prove RED  → minimal code → prove GREEN
+...
+Step N: Test configuration (pytest.ini / pyproject [tool.pytest], pytest-cov)
+```
+
+### 3. Step 4 (Generation) — drive the red/green loop through the tool
+
+Add to the delegation prompt to `aidlc-developer-agent`:
+
+```
+Follow the Iron Law in your knowledge file `python-tdd.md`. For EACH behaviour,
+in order:
+  1. Write ONE failing test (editing test files is always permitted).
+  2. Prove RED:  bun $CLAUDE_PROJECT_DIR/.claude/tools/aidlc-tdd.ts red <test path/nodeid>
+     — the guard confirms it fails for the right reason and UNLOCKS production edits.
+  3. Write the minimal production code (the PreToolUse guard now permits it).
+  4. Prove GREEN: bun $CLAUDE_PROJECT_DIR/.claude/tools/aidlc-tdd.ts green
+     — full suite + coverage floor; closes the cycle and re-locks production edits.
+  5. Refactor while green, commit, next behaviour.
+Do not batch behaviours. One test, one green, one commit.
+```
+
+Also add to Step 5 (code summary): "copy the closed cycles from
+`aidlc-docs/.tdd/ledger.json` into a `tdd-ledger-summary.md` — the audit trail
+proving each production change was preceded by a RED."
+
+`build-and-test` can stay as-is (it now *verifies* an already-tested unit rather
+than creating tests from scratch — which is what its own text already claims to
+do), or be trimmed to a build/coverage-report stage.
+
+## Option B — ship a new `tdd-construction` stage (upgrade-friendly)
+
+Add `core/aidlc-common/stages/construction/tdd-construction.md` (the standalone
+stage from the earlier package, with the same TDD ordering + tool calls) and, in
+each scope's stage list, swap `CG`/`BT` for the new stage id. This keeps your TDD
+logic in a file that won't be clobbered when you pull upstream changes to
+`code-generation.md`. Trade-off: you maintain the scope→stage wiring yourself.
+
+Recommendation: **Option A** if you've forked core and track upstream loosely;
+**Option B** if you want to rebase on upstream v2 releases cleanly.

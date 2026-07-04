@@ -27,3 +27,6 @@ These are available in the Claude distribution only:
 - **agent** `candidate-researcher` — 技術選定で1つの候補(ライブラリ/フレームワーク/サービス等)を独立コンテキストで調査するワーカー。tech-selection-research スキルから候補ごとに委譲して使う。指定された評価軸で調べ、公式ドキュメントなど信頼できる一次情報の原文を引用しながら裏取りし、本線には render.py 用のJSON断片(主張+原文引用+バッジ)と要約だけを返す。生成後レポートへの「なぜ/もっと調べて」という深掘り依頼にも、対象の論点だけを再調査して応える。本線のコンテキストを汚さないためのエージェント。
 - **agent** `report-copyeditor` — 生成済み技術レポートの軽い文章修正を行う低コストのワーカー。文言・誤字・トーン・簡潔化・語順・ラベル表記など、意味や事実を変えないテキスト修正だけを担当する。report-revision スキルから、軽微な修正に振り分けられて呼ばれる。事実・原文引用・数値・構造・図解には触れない。
 - **agent** `report-reviser` — 生成済み技術レポートの重い修正を行うワーカー。図解の改善・配色/スタイル/レイアウト変更・セクションの追加削除や再構成・表構造の変更など、判断や設計を要する修正を担当する。report-revision スキルから、重い修正に振り分けられて呼ばれる。事実と原文引用は保持し、新たな事実調査が必要な場合は深掘りに差し戻す。
+- **hook** `aidlc-tdd-guard` — 
+- **tool** `aidlc-tdd` — 
+- **sensor** `aidlc-pytest` — Runs the project's pytest suite + coverage floor; fires on Python writes and surfaces failing tests / coverage gaps as SENSOR_FAILED at the stage gate.

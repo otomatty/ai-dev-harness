@@ -4,7 +4,7 @@ import { projectClaude } from "./lib/project-claude";
 import { projectCursor } from "./lib/project-cursor";
 import { projectAgentsMd } from "./lib/project-agents-md";
 import { mergeClaudeSettings } from "./lib/settings-merge";
-import { cleanDir, writeFileEnsured } from "./lib/io";
+import { cleanDir, writeFileEnsured, applyTemplate } from "./lib/io";
 
 export function build(root: string): { warnings: string[] } {
   const coreDir = join(root, "core");
@@ -18,7 +18,8 @@ export function build(root: string): { warnings: string[] } {
 
   warnings.push(...projectClaude(caps, coreDir, distClaude, ".claude").warnings);
   const settings = mergeClaudeSettings(join(root, "harness/claude"));
-  writeFileEnsured(join(distClaude, ".claude/settings.json"), JSON.stringify(settings, null, 2) + "\n");
+  const settingsText = applyTemplate(JSON.stringify(settings, null, 2) + "\n", { HARNESS_DIR: ".claude" });
+  writeFileEnsured(join(distClaude, ".claude/settings.json"), settingsText);
 
   warnings.push(...projectCursor(caps, coreDir, distCursor).warnings);
   warnings.push(...projectAgentsMd(caps, distAgents).warnings);

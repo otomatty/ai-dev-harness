@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 
 export function applyTemplate(text: string, vars: Record<string, string>): string {
   return text.replace(/\{\{(\w+)\}\}/g, (m, key) =>
-    key in vars ? vars[key] : m,
+    Object.hasOwn(vars, key) ? vars[key] : m,
   );
 }
 

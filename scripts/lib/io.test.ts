@@ -10,6 +10,7 @@ afterAll(() => rmSync(dir, { recursive: true, force: true }));
 test("applyTemplate substitutes known vars, keeps unknown", () => {
   expect(applyTemplate("bun {{HARNESS_DIR}}/x {{OTHER}}", { HARNESS_DIR: ".claude" }))
     .toBe("bun .claude/x {{OTHER}}");
+  expect(applyTemplate("{{constructor}}", { HARNESS_DIR: ".claude" })).toBe("{{constructor}}");
 });
 
 test("writeFileEnsured creates parent dirs", () => {
@@ -31,4 +32,5 @@ test("cleanDir empties an existing dir", () => {
   writeFileEnsured(join(d, "old.txt"), "x");
   cleanDir(d);
   expect(existsSync(join(d, "old.txt"))).toBe(false);
+  expect(existsSync(d)).toBe(true);
 });

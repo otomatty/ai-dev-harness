@@ -1,0 +1,98 @@
+# Manual catalog metadata (dependsOn, keywords, bundles).
+# Component ids match scanCore() capability names.
+
+bundles:
+  - id: tech-selection
+    label: 技術選定レポート一式
+    components:
+      - tech-selection-research
+      - source-verification
+      - research-writeup
+      - report-revision
+      - candidate-researcher
+      - report-copyeditor
+      - report-reviser
+  - id: ai-dlc-tdd
+    label: AI-DLC TDD 拡張
+    components:
+      - aidlc-tdd-guard
+      - aidlc-tdd
+      - aidlc-lib
+      - aidlc-pytest
+      - construction/code-generation.integration
+  - id: full
+    label: 全部
+    components: ["*"]
+
+components:
+  install-ai-dev-harness:
+    keywords:
+      - ai-dev-harness
+      - ハーネス導入
+      - スキルインストール
+      - bootstrap
+  tech-selection-research:
+    keywords:
+      - 技術選定
+      - ライブラリ比較
+      - フレームワーク選定
+      - どれを採用
+    dependsOn:
+      - candidate-researcher
+      - source-verification
+      - research-writeup
+      - report-revision
+  source-verification:
+    keywords:
+      - 裏取り
+      - ソース検証
+      - 一次情報
+  research-writeup:
+    keywords:
+      - HTMLレポート
+      - 調査レポート
+      - 図解レポート
+  report-revision:
+    keywords:
+      - レポート修正
+      - レポート改稿
+  candidate-researcher:
+    keywords:
+      - 候補調査
+      - サブエージェント
+  report-copyeditor:
+    keywords:
+      - コピー編集
+  report-reviser:
+    keywords:
+      - レポート改訂
+  aidlc-tdd-guard:
+    keywords:
+      - TDDガード
+      - PreToolUse
+      - RED GREEN
+    dependsOn:
+      - aidlc-tdd
+      - aidlc-lib
+    settingsFragments:
+      - optional/settings.pretooluse-tdd.json
+  aidlc-tdd:
+    keywords:
+      - TDD
+      - RED GREEN
+      - 状態機械
+    dependsOn:
+      - aidlc-lib
+  aidlc-lib:
+    keywords:
+      - aidlc
+      - 共通ライブラリ
+  aidlc-pytest:
+    keywords:
+      - pytest
+      - sensor
+  construction/code-generation.integration:
+    keywords:
+      - AI-DLC
+      - construction
+      - コード生成

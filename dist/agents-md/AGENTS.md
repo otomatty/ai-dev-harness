@@ -4,6 +4,10 @@
 
 ## Skills
 
+## Skill: install-ai-dev-harness
+
+otomatty/ai-dev-harness のスキル・ハーネス・AI-DLC 拡張を、別プロジェクトへ自然言語で個別または一式導入する。ユーザーが「ai-dev-harness を入れたい」「技術選定スキルを Cursor に追加」「TDD 拡張だけ入れて」「bootstrap して」などと言ったとき、環境（Claude Code / Cursor / AGENTS.md）を検出し、catalog から component または bundle を特定して CLI で導入する。オープンエコシステムの skills.sh 向け探索は find-skills を使い、本リポジトリ固有の資材はこのスキルで扱う。
+
 ## Skill: report-revision
 
 生成済みの技術調査レポート(research-writeup が出力したHTML/データ)に対する修正依頼を、内容に応じて適切なエージェントに振り分けるスキル。文言の直し・誤字・トーン・簡潔化など軽い修正は安いモデルの report-copyeditor に、図解の改善・レイアウト/スタイル変更・セクション再構成など重い修正は少し性能の高い report-reviser に委譲する。「レポートを修正したい」「この文言を直して」「図解を改善して」「ここを書き換えて」「レイアウトを変えて」「表現を簡潔に」といった依頼で使う。新たな事実の調査が必要な修正は revision ではなく candidate-researcher の深掘りに回す。Claude Code 環境での利用を前提とする。

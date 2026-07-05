@@ -14,10 +14,7 @@ export interface FetchedDist {
   cleanup: () => void;
 }
 
-export async function fetchDistSource(
-  agent: Agent,
-  options: FetchOptions = {},
-): Promise<FetchedDist> {
+export async function fetchRepoRoot(options: FetchOptions = {}): Promise<FetchedDist> {
   const repo = options.repo ?? DEFAULT_REPO;
   const ref = options.ref ?? DEFAULT_REF;
   const tarballUrl = tarballUrlFor(repo, ref);
@@ -38,19 +35,32 @@ export async function fetchDistSource(
     await extractTarGz(archivePath, extractDir);
 
     const repoDir = findRepoDir(extractDir);
-    const sourcePath = join(repoDir, DIST_SOURCE[agent]);
-    if (!existsSync(sourcePath)) {
-      throw new Error(`Distribution missing in ${repo}@${ref}: ${DIST_SOURCE[agent]}`);
-    }
-
     return {
-      sourcePath,
+      sourcePath: repoDir,
       cleanup: () => rmSync(tempRoot, { recursive: true, force: true }),
     };
   } catch (error) {
     rmSync(tempRoot, { recursive: true, force: true });
     throw error;
   }
+}
+
+export async function fetchDistSource(
+  agent: Agent,
+  options: FetchOptions = {},
+): Promise<FetchedDist> {
+  const repo = options.repo ?? DEFAULT_REPO;
+  const ref = options.ref ?? DEFAULT_REF;
+  const fetched = await fetchRepoRoot(options);
+  const sourcePath = join(fetched.sourcePath, DIST_SOURCE[agent]);
+  if (!existsSync(sourcePath)) {
+    fetched.cleanup();
+    throw new Error(`Distribution missing in ${repo}@${ref}: ${DIST_SOURCE[agent]}`);
+  }
+  return {
+    sourcePath,
+    cleanup: fetched.cleanup,
+  };
 }
 
 function tarballUrlFor(repo: string, ref: string): string {

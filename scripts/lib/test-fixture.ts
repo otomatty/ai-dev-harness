@@ -11,4 +11,8 @@ export function seedMinimalHarnessRoot(root: string): void {
   writeFileSync(join(root, "harness/claude/marketplace.json"), '{"name":"test-marketplace","plugins":[]}');
   writeFileSync(join(root, "harness/codex/plugin.manifest.json"), '{"name":"test-plugin","skills":"./skills/"}');
   writeFileSync(join(root, "harness/codex/marketplace.json"), '{"name":"test-marketplace","plugins":[]}');
+  writeFileSync(
+    join(root, "core/catalog.overrides.yaml"),
+    "bundles:\n  - id: full\n    label: 全部\n    components: ['*']\n",
+  );
 }

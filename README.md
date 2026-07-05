@@ -44,6 +44,37 @@ curl -fsSL https://raw.githubusercontent.com/otomatty/ai-dev-harness/main/script
 
 `[dir]` を省略するとカレントディレクトリ。特定バージョンは `--ref v0.1.0`（タグやブランチ名）。
 
+## 個別導入（catalog + CLI）
+
+`dist/catalog.json`（ビルド生成）に component / bundle 一覧があります。
+
+```bash
+# 一覧・詳細
+bunx github:otomatty/ai-dev-harness list
+bunx github:otomatty/ai-dev-harness describe tech-selection
+
+# 個別 / bundle 導入（依存は自動解決）
+bunx github:otomatty/ai-dev-harness install \
+  --agent cursor \
+  --components tech-selection-research
+
+bunx github:otomatty/ai-dev-harness install \
+  --agent claude \
+  --components ai-dlc-tdd ./my-app
+
+# bootstrap: 導入スキルだけ先に入れる
+bunx github:otomatty/ai-dev-harness bootstrap cursor
+```
+
+| サブコマンド | 用途 |
+|---|---|
+| `list` | catalog 一覧 |
+| `describe <id>` | component / bundle の説明・依存・エージェント対応 |
+| `install --agent … --components …` | 個別または bundle 導入 |
+| `bootstrap <agent>` | `install-ai-dev-harness` スキルのみ導入 |
+
+導入後は **install-ai-dev-harness** スキルで自然言語から同様の操作ができます。
+
 ## Claude Code / Codex プラグインとして導入（推奨）
 
 マーケットプレイス経由で `/plugin install` 相当の操作ができます（clone 不要）。

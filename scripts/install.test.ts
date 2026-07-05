@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { build } from "./build";
-import { installHarness } from "./install";
+import { parseInstallArgs, installHarness, installHarnessComponents } from "./install";
 import { parseAgent } from "./lib/install-layout";
 import { seedMinimalHarnessRoot } from "./lib/test-fixture";
 
@@ -99,4 +99,29 @@ test("installHarness uses remote fetch when --ref is provided", async () => {
     ref: "main",
   });
   expect(result.source).toBe("remote");
+});
+
+test("parseInstallArgs routes list subcommand", () => {
+  const parsed = parseInstallArgs(["list"]);
+  expect(parsed.mode).toBe("list");
+  expect(parsed.subcommand).toBe("list");
+});
+
+test("parseInstallArgs routes bootstrap with agent", () => {
+  const parsed = parseInstallArgs(["bootstrap", "cursor", project]);
+  expect(parsed.subcommand).toBe("bootstrap");
+  expect(parsed.agent).toBe("cursor");
+  expect(parsed.components).toEqual(["install-ai-dev-harness"]);
+  expect(parsed.targetDir).toBe(project);
+});
+
+test("installHarnessComponents installs single component locally", async () => {
+  const result = await installHarnessComponents({
+    agent: "cursor",
+    targetDir: project,
+    components: ["foo"],
+    sourceRoot: root,
+  });
+  expect(result.installed).toContain("foo");
+  expect(existsSync(join(project, ".cursor/rules/foo.mdc"))).toBe(true);
 });

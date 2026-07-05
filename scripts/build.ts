@@ -3,9 +3,10 @@ import { scanCore } from "./lib/scan";
 import { projectClaude } from "./lib/project-claude";
 import { projectCodexPlugin } from "./lib/project-codex-plugin";
 import { projectCursor } from "./lib/project-cursor";
-import { projectAgentsMd } from "./lib/project-agents-md";
+import { projectAgentsMd, projectAgentsMdFragments } from "./lib/project-agents-md";
 import { mergeClaudeSettings } from "./lib/settings-merge";
 import { cleanDir, writeFileEnsured, applyTemplate, copyFileEnsured } from "./lib/io";
+import { buildCatalog, catalogPath } from "./lib/catalog";
 
 const DIST_TARGETS = ["claude", "claude-plugin", "cursor", "codex-plugin", "agents-md"] as const;
 
@@ -57,6 +58,10 @@ export function build(root: string): { warnings: string[] } {
     join(root, "harness/codex/marketplace.json"),
     join(root, ".agents/plugins/marketplace.json"),
   );
+
+  const catalog = buildCatalog(root);
+  writeFileEnsured(catalogPath(root), JSON.stringify(catalog, null, 2) + "\n");
+  projectAgentsMdFragments(caps, distAgents);
 
   return { warnings };
 }

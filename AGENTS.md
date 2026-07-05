@@ -4,7 +4,8 @@
 
 ## 絶対ルール
 
-- 編集してよいのは `core/`, `harness/`, `lab/`, `docs/` のみ。
+- 能力（スキル/エージェント/フック等）を編集してよいのは `core/`, `harness/`, `lab/`, `docs/` のみ。
+- ビルド・変換ツール（`scripts/`）はメンテナンス目的で編集してよい。変更時は `bun test` と `bun run check` を通すこと。
 - `dist/` は `bun run build` の生成物。**手編集禁止**。
 - 能力を1つ追加/変更したら `bun run build` → `bun run check` を実行してからコミット。
 - Python/HTML/JSON アセットは変換せずコピーする。
@@ -14,6 +15,7 @@
 
 - `core/` — 単一情報源（中立）
 - `harness/<agent>/` — 各エージェント向けアダプタ
+- `scripts/` — ビルド・チェック・インストールのツール（メンテナンス時のみ編集）
 - `dist/<agent>/` — 生成物（コミットするが手編集禁止）
 
 ## コマンド

@@ -17,7 +17,6 @@ bundles:
     components:
       - aidlc-tdd-guard
       - aidlc-tdd
-      - aidlc-lib
       - aidlc-pytest
       - construction/code-generation.integration
   - id: full
@@ -73,7 +72,6 @@ components:
       - RED GREEN
     dependsOn:
       - aidlc-tdd
-      - aidlc-lib
     settingsFragments:
       - optional/settings.pretooluse-tdd.json
   aidlc-tdd:
@@ -81,12 +79,6 @@ components:
       - TDD
       - RED GREEN
       - 状態機械
-    dependsOn:
-      - aidlc-lib
-  aidlc-lib:
-    keywords:
-      - aidlc
-      - 共通ライブラリ
   aidlc-pytest:
     keywords:
       - pytest

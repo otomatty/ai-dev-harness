@@ -9,7 +9,7 @@ import {
   PROJECT_DEST,
   type Agent,
 } from "./install-layout";
-import { scanCore, type Capability } from "./scan";
+import { scanCore, scanSupportModules, type Capability } from "./scan";
 import { deepMerge } from "./settings-merge";
 import { applyTemplate, writeFileEnsured } from "./io";
 
@@ -77,6 +77,7 @@ export function installComponents(options: InstallComponentsOptions): InstallCom
 
   const settingsFragments = new Set<string>();
   const fragmentPaths: string[] = [];
+  let needsSupportModules = false;
 
   for (const id of resolvedIds) {
     const component = catalog.components.find((c) => c.id === id);
@@ -113,7 +114,18 @@ export function installComponents(options: InstallComponentsOptions): InstallCom
     for (const frag of component.settingsFragments) {
       settingsFragments.add(frag);
     }
+    if (cap.type === "tool" || cap.type === "hook") needsSupportModules = true;
     installed.push(id);
+  }
+
+  // Tools/hooks import shared libraries (e.g. tools/aidlc-lib.ts) that are not
+  // catalog components; copy them alongside so the imports resolve.
+  if (agent === "claude" && needsSupportModules) {
+    for (const mod of scanSupportModules(join(repoRoot, "core"))) {
+      const rel = `${mod.subdir}/${mod.fileName}`;
+      const src = join(distRoot, rel);
+      if (existsSync(src)) copyTree(src, join(destRoot, rel));
+    }
   }
 
   if (agent === "claude" && settingsFragments.size > 0) {

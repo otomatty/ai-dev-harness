@@ -66,6 +66,31 @@ test("installComponents merges claude settings when settingsFragments configured
   expect(settings).toContain("PostToolUse");
 });
 
+test("installComponents copies shared support libs alongside a tool", () => {
+  mkdirSync(join(root, "core/tools"), { recursive: true });
+  writeFileSync(join(root, "core/tools/demo-lib.ts"), "export const helper = 1;");
+  writeFileSync(
+    join(root, "core/tools/demo-tool.ts"),
+    "import { helper } from './demo-lib';\nconsole.log(helper);",
+  );
+  build(root);
+
+  const catalog = buildCatalog(root);
+  const result = installComponents({
+    agent: "claude",
+    targetDir: project,
+    componentIds: ["demo-tool"],
+    repoRoot: root,
+    catalog,
+  });
+
+  expect(result.installed).toContain("demo-tool");
+  expect(existsSync(join(project, ".claude/tools/demo-tool.ts"))).toBe(true);
+  // the shared lib is not a catalog component, but must ride along so imports resolve
+  expect(catalog.components.some((c) => c.id === "demo-lib")).toBe(false);
+  expect(existsSync(join(project, ".claude/tools/demo-lib.ts"))).toBe(true);
+});
+
 test("installComponents writes agents-md fragment block", () => {
   const catalog = buildCatalog(root);
   const result = installComponents({

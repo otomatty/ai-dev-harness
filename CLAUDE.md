@@ -4,8 +4,13 @@
 
 ## Claude 固有の補足
 
-- 生成された Claude 配布物は `dist/claude/.claude/` にある。
-- 他プロジェクトへは `dist/claude/.claude/` を対象プロジェクトの `.claude/` へ
-  コピーして導入する（現状の正式手順）。
-- marketplace 経由の `/plugin install` は未対応（`dist/claude` は `.claude/` サブツリー形で、
-  `plugin.json` を持つプラグインルート形状ではないため）。将来 plugin 形状ビルドを追加予定。
+- 生成された Claude 配布物:
+  - ファイルコピー用: `dist/claude/.claude/`
+  - プラグイン用: `dist/claude-plugin/`（`plugin.json` + コンポーネントをプラグインルート直下）
+- 他プロジェクトへの導入:
+  - **推奨（プラグイン）:** `/plugin marketplace add otomatty/ai-dev-harness` →
+    `/plugin install ai-dev-harness@ai-dev-harness`
+  - **CLI / ファイル:** `bunx github:otomatty/ai-dev-harness claude [dir]` または
+    `dist/claude/.claude/` の手動コピー
+- Codex 向けプラグインは `dist/codex-plugin/` + `.agents/plugins/marketplace.json`
+  （`codex plugin marketplace add otomatty/ai-dev-harness`）

@@ -26,3 +26,11 @@ export function hashDir(dir: string): string {
   }
   return h.digest("hex");
 }
+
+export function hashPath(path: string): string {
+  if (!existsSync(path)) return hashDir(path);
+  if (statSync(path).isFile()) {
+    return createHash("sha256").update(readFileSync(path)).digest("hex");
+  }
+  return hashDir(path);
+}

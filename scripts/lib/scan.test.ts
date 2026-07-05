@@ -3,7 +3,7 @@ import { test, expect, beforeEach, afterEach } from "bun:test";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { scanCore } from "./scan";
+import { scanCore, scanSupportModules, isSupportModule } from "./scan";
 
 let dir: string;
 beforeEach(() => {
@@ -35,6 +35,27 @@ test("scans agents, hooks, and aidlc rules", () => {
   const rule = caps.find((c) => c.type === "aidlc-rule")!;
   expect(rule.name).toBe("construction/code-gen");
   expect(rule.relPath).toBe("ai-dlc/construction/code-gen.md");
+});
+
+test("isSupportModule flags shared `*-lib.ts` files only", () => {
+  expect(isSupportModule("aidlc-lib.ts")).toBe(true);
+  expect(isSupportModule("aidlc-tdd.ts")).toBe(false);
+  expect(isSupportModule("guard.ts")).toBe(false);
+});
+
+test("scanCore excludes shared libs; scanSupportModules collects them", () => {
+  mkdirSync(join(dir, "tools"), { recursive: true });
+  writeFileSync(join(dir, "tools/shared-lib.ts"), "export const x = 1;");
+  writeFileSync(join(dir, "tools/real-tool.ts"), "// tool");
+
+  const caps = scanCore(dir);
+  expect(caps.find((c) => c.type === "tool" && c.name === "real-tool")).toBeTruthy();
+  expect(caps.find((c) => c.name === "shared-lib")).toBeUndefined();
+
+  const mods = scanSupportModules(dir);
+  const lib = mods.find((m) => m.fileName === "shared-lib.ts")!;
+  expect(lib.subdir).toBe("tools");
+  expect(lib.rawText).toContain("export const x");
 });
 
 test("orders skills deterministically by name regardless of insertion order", () => {

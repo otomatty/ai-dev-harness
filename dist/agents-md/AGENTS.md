@@ -32,6 +32,5 @@ These are available in the Claude distribution only:
 - **agent** `report-copyeditor` — 生成済み技術レポートの軽い文章修正を行う低コストのワーカー。文言・誤字・トーン・簡潔化・語順・ラベル表記など、意味や事実を変えないテキスト修正だけを担当する。report-revision スキルから、軽微な修正に振り分けられて呼ばれる。事実・原文引用・数値・構造・図解には触れない。
 - **agent** `report-reviser` — 生成済み技術レポートの重い修正を行うワーカー。図解の改善・配色/スタイル/レイアウト変更・セクションの追加削除や再構成・表構造の変更など、判断や設計を要する修正を担当する。report-revision スキルから、重い修正に振り分けられて呼ばれる。事実と原文引用は保持し、新たな事実調査が必要な場合は深掘りに差し戻す。
 - **hook** `aidlc-tdd-guard` — 
-- **tool** `aidlc-lib` — 
 - **tool** `aidlc-tdd` — 
 - **sensor** `aidlc-pytest` — Runs the project's pytest suite + coverage floor; fires on Python writes and surfaces failing tests / coverage gaps as SENSOR_FAILED at the stage gate.

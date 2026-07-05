@@ -16,6 +16,38 @@ export interface Capability {
   assets: string[];
 }
 
+/**
+ * Shared `*.ts` libraries under `core/tools/` or `core/hooks/` that other
+ * capabilities import (e.g. `aidlc-lib.ts`). They are copied verbatim so the
+ * imports resolve at runtime, but they are NOT projected capabilities: they must
+ * not appear in the catalog, the plugin manifest, or degradation warnings.
+ */
+export function isSupportModule(fileName: string): boolean {
+  return /-lib\.ts$/.test(fileName);
+}
+
+export interface SupportModule {
+  /** Subdirectory under the harness root (`tools` | `hooks`). */
+  subdir: string;
+  /** File name including extension (e.g. `aidlc-lib.ts`). */
+  fileName: string;
+  /** Absolute path to the source file under `core/`. */
+  sourcePath: string;
+  rawText: string;
+}
+
+export function scanSupportModules(coreDir: string): SupportModule[] {
+  const out: SupportModule[] = [];
+  for (const subdir of ["tools", "hooks"]) {
+    for (const f of walk(join(coreDir, subdir))) {
+      const fileName = f.split(sep).pop()!;
+      if (!isSupportModule(fileName)) continue;
+      out.push({ subdir, fileName, sourcePath: f, rawText: readFileSync(f, "utf8") });
+    }
+  }
+  return out;
+}
+
 function walk(dir: string): string[] {
   if (!existsSync(dir)) return [];
   const out: string[] = [];
@@ -66,7 +98,9 @@ export function scanCore(coreDir: string): Capability[] {
   for (const [sub, type, match] of flat) {
     for (const f of walk(join(coreDir, sub))) {
       if (!match(f)) continue;
-      const base = f.split(sep).pop()!.replace(/\.(md|ts)$/, "");
+      const fileName = f.split(sep).pop()!;
+      if (isSupportModule(fileName)) continue; // shared lib, copied separately
+      const base = fileName.replace(/\.(md|ts)$/, "");
       caps.push(load(type, coreDir, f, base));
     }
   }

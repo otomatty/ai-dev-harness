@@ -19,7 +19,7 @@ export interface Capability {
 function walk(dir: string): string[] {
   if (!existsSync(dir)) return [];
   const out: string[] = [];
-  for (const entry of readdirSync(dir)) {
+  for (const entry of readdirSync(dir).sort()) {
     if (entry === ".gitkeep") continue;
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) out.push(...walk(full));
@@ -44,7 +44,7 @@ export function scanCore(coreDir: string): Capability[] {
   // skills: core/skills/<name>/SKILL.md (+ sibling assets)
   const skillsDir = join(coreDir, "skills");
   if (existsSync(skillsDir)) {
-    for (const name of readdirSync(skillsDir)) {
+    for (const name of readdirSync(skillsDir).sort()) {
       const sdir = join(skillsDir, name);
       if (!statSync(sdir).isDirectory()) continue;
       const skillFile = join(sdir, "SKILL.md");

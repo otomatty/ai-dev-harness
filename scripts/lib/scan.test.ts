@@ -36,3 +36,12 @@ test("scans agents, hooks, and aidlc rules", () => {
   expect(rule.name).toBe("construction/code-gen");
   expect(rule.relPath).toBe("ai-dlc/construction/code-gen.md");
 });
+
+test("orders skills deterministically by name regardless of insertion order", () => {
+  mkdirSync(join(dir, "skills/alpha"), { recursive: true });
+  writeFileSync(join(dir, "skills/alpha/SKILL.md"), "---\nname: alpha\ndescription: a\n---\nb");
+  mkdirSync(join(dir, "skills/zeta"), { recursive: true });
+  writeFileSync(join(dir, "skills/zeta/SKILL.md"), "---\nname: zeta\ndescription: z\n---\nb");
+  const names = scanCore(dir).filter((c) => c.type === "skill").map((c) => c.name);
+  expect(names).toEqual(["alpha", "foo", "zeta"]);
+});
